@@ -1,0 +1,33 @@
+{
+  "name": "assets-master",
+  "version": "0.0.2",
+  "description": "",
+  "type": "module",
+  "module": "bin/cli.ts",
+  "main": "bin/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "bun --watch bin/cli.ts scan",
+    "debug": "bun --inspect --watch bin/cli.ts scan",
+    "start": "bun bin/cli.ts"
+  },
+  "bin": {
+    "asset-master": "./bin/cli.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "commander": "^14.0.2",
+    "image-size": "^2.0.2",
+    "open": "^11.0.0",
+    "picocolors": "^1.1.1",
+    "yocto-spinner": "^1.0.0"
+  }
+}
