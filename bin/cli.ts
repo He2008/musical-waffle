@@ -7,6 +7,8 @@ import open from "open";
 import path from "path";
 import pkg from "../package.json" assert { type: "json" };
 import yoctoSpinner from "yocto-spinner";
+import { scanAssets } from "../lib/scan";
+import { startServer } from "../lib/server";
 
 const version = pkg.version || "0.0.1";
 const program = new Command();
@@ -28,30 +30,19 @@ program
     );
     console.log(`${pc.blue("▶")} 目标目录: ${pc.white(rootDir)}\n`);
 
-    const assets = async function () {
-      // 模拟扫描过程
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve([
-            { name: "image1.png", size: "150KB" },
-            { name: "script.js", size: "45KB" },
-            { name: "style.css", size: "30KB" },
-          ]);
-        }, 1000);
-      });
-    };
+  
     const spinner = yoctoSpinner().start();
-    let a = await assets();
-    //    console.log(a)
-    spinner.success(
-      `${pc.green("✔")} 扫描完成，发现 ${a.length} 个资源文件。\n`,
-    );
-    console.table(a);
-    console.log(`\n${pc.blue("▶")} 启动本地服务器预览扫描结果...`);
+            // 3. 执行扫描，带进度反馈
+      const assets = await scanAssets(rootDir, (current, total) => {
+        spinner.text = `正在扫描: ${pc.yellow(current)}/${pc.yellow(total)} 个资产...`;
+      });
 
-        // 3. 启动服务
+      spinner.success(pc.green(`扫描成功！在项目中发现了 ${pc.bold(assets.length)} 个静态资产。`));
+
+      console.table(assets, ["id", "name", "relativePath", "size", "dimensions"]);
+
       const port = parseInt(options.port);
-    //   const server =( await startServer(rootDir, assets, port);)
+      const server = await startServer(port, rootDir, assets);
 
       const url = `http://localhost:${port}/dashboard/`;
       
