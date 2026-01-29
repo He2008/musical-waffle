@@ -2,12 +2,11 @@
 
 import { Command } from "commander";
 import pc from "picocolors";
-// import {creat} from 'yocto-spinner'
 import open from "open";
 import path from "path";
 import pkg from "../package.json" assert { type: "json" };
 import yoctoSpinner from "yocto-spinner";
-import { scanAssets, AssetScanner } from "../lib/scan";
+import { AssetScanner } from "../lib/scan";
 import { startServer } from "../lib/server";
 
 const version = pkg.version || "0.0.1";

@@ -158,43 +158,18 @@ export class AssetScanner {
       return pattern.test(normalizedPath);
     });
   }
-}
 
-export async function scanAssets(
-  rootDir: string,
-  onProgress?: (current: number, total: number) => void,
-) {
-  const glob = new Glob("**/*.{png,jpg,jpeg,gif,webp,svg}");
-
-  const allFiles = Array.from(glob.scanSync({ cwd: rootDir }));
-  const total = allFiles.length;
-  const assets: Asset[] = [];
-
-  for (let i = 0; i < total; i++) {
-    const fileRelPath = allFiles[i];
-    if (fileRelPath === undefined) continue;
-    if (fileRelPath.includes("node_modules") || fileRelPath.includes(".git"))
-      continue;
-
-    const fullPath = path.join(rootDir, fileRelPath);
-    const file = Bun.file(fullPath);
-
-    let dimensions = { width: 0, height: 0 };
-    try {
-      const buffer = await file.arrayBuffer();
-      dimensions = imageSize(Buffer.from(buffer)) as any;
-    } catch (e) {}
-
-    assets.push({
-      id: Bun.hash(fileRelPath).toString(16),
-      name: path.basename(fileRelPath),
-      relativePath: fileRelPath,
-      size: file.size,
-      dimensions,
-    });
-
-    if (onProgress) onProgress(i + 1, total);
+  private async loadGitignore() {
+  const gitignoreFile = Bun.file(path.join(this.rootDir, ".gitignore"));
+  if (await gitignoreFile.exists()) {
+    const content = await gitignoreFile.text();
+    const rules = content
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line && !line.startsWith('#')); // 过滤空行和注释
+    
+    this.customIgnore = [...new Set([...this.customIgnore, ...rules])];
   }
-
-  return assets;
 }
+}
+

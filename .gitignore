@@ -39,6 +39,7 @@ bun.lockb
 
 # Editor
 .vscode/
+.cursor/
 
 # OS
 Thumbs.db
@@ -58,3 +59,4 @@ build/
 
 # Keep placeholder
 !.gitkeep
+
