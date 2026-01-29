@@ -7,7 +7,7 @@ import open from "open";
 import path from "path";
 import pkg from "../package.json" assert { type: "json" };
 import yoctoSpinner from "yocto-spinner";
-import { scanAssets } from "../lib/scan";
+import { scanAssets, AssetScanner } from "../lib/scan";
 import { startServer } from "../lib/server";
 
 const version = pkg.version || "0.0.1";
@@ -33,20 +33,27 @@ program
 
     const spinner = yoctoSpinner().start();
     // 3. 执行扫描，带进度反馈
-    const assets = await scanAssets(rootDir, (current, total) => {
-      spinner.text = `正在扫描: ${pc.yellow(current)}/${pc.yellow(total)} 个资产...`;
+    const scanner = new AssetScanner(rootDir, []);
+
+    const scanResult = await scanner.scan((current, total, fileName) => {
+      spinner.text = `正在扫描: ${pc.yellow(current)}/${pc.yellow(
+        total,
+      )} 个资产... 当前文件: ${pc.green(fileName)}`;
     });
 
-    spinner.success(
-      pc.green(
-        `扫描成功！在项目中发现了 ${pc.bold(assets.length)} 个静态资产。`,
-      ),
-    );
+
+    spinner.success(`
+📊 项目统计:
+- 总计资源: ${pc.cyan(scanResult.assets.length)} 个
+- 冗余资源: ${pc.yellow(scanResult.assets.filter((a) => !a.isUsed).length)} 个
+- 重复文件: ${pc.red(scanResult.stats.duplicateCount)} 组
+- 可节省空间: ${pc.green((scanResult.stats.unusedSize / 1024 / 1024).toFixed(2) + " MB")}
+`);
 
     // console.table(assets, ["id", "name", "relativePath", "size", "dimensions"]);
 
     const port = parseInt(options.port);
-    const server = await startServer(port, rootDir, assets);
+    const server = await startServer(port, rootDir, scanResult);
 
     const url = `http://localhost:${port}/dashboard/`;
 

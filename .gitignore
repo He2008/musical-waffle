@@ -52,7 +52,6 @@ pnpm-debug.log*
 
 # Build outputs
 build/
-lib/
 
 # Coverage output
 .nyc_output/
